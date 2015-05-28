@@ -1,7 +1,9 @@
+use std::hash::Hash;
+
 // (row, column). Top-left is (0, 0), bottom-right is (2, 2)
 pub type Action = (usize, usize, CellState);
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash)]
 pub enum CellState { X, O, Nil }
 
 #[derive(Copy, Clone)]
@@ -10,6 +12,12 @@ pub struct GameState {
 }
 
 impl GameState {
+    pub fn new() -> GameState {
+        GameState {
+            state: [[CellState::Nil; 3]; 3],
+        }
+    }
+
     pub fn act_upon(&mut self, &(i, j, state): &Action) {
         self.state[i][j] = state;
     }
@@ -28,5 +36,9 @@ impl GameState {
             }
         }
         true
+    }
+
+    pub fn cell_is_nil(&self, row: usize, col: usize) -> bool {
+        self.state[row][col] == CellState::Nil
     }
 }

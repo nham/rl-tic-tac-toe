@@ -1,7 +1,7 @@
 #![feature(slice_patterns)]
 
 use game::{Action, GameState};
-use game::CellState::{X, O};
+use game::CellState::{self, X, O};
 use player::Player;
 
 mod game;
@@ -32,6 +32,14 @@ struct TTTGame<'a> {
 
 
 impl<'a> TTTGame<'a> {
+    fn new(player1: &'a mut Player, player2: &'a mut Player) -> TTTGame<'a> {
+        TTTGame {
+            current: PlayerId::P1,
+            players: [player1, player2],
+            gamestate: GameState::new(),
+        }
+    }
+
     fn play(&mut self) -> GameResult {
         loop {
             self.advance_state();
@@ -46,6 +54,13 @@ impl<'a> TTTGame<'a> {
         }
     }
 
+    fn current_XO(&self) -> CellState {
+        match self.current {
+            PlayerId::P1 => X,
+            PlayerId::P2 => O,
+        }
+    }
+
     fn current_player(&self) -> &Player {
         match self.current {
             PlayerId::P1 => self.players[0],
@@ -54,8 +69,9 @@ impl<'a> TTTGame<'a> {
     }
 
     fn advance_state(&mut self) {
-        let action = self.current_player().choose_action(&self.gamestate);
-        self.gamestate.act_upon(&action);
+        let (i, j) = self.current_player().choose_action(&self.gamestate);
+        let state = self.current_XO();
+        self.gamestate.act_upon(&(i, j, state));
         self.current = self.current.next();
     }
     
