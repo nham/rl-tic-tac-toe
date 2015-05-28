@@ -1,3 +1,5 @@
+use super::PlayerId;
+
 use std::hash::Hash;
 
 
@@ -66,6 +68,13 @@ impl GameState {
             | [[O, _, _], [_, O, _], [_, _, O]]
             | [[_, _, O], [_, O, _], [O, _, _]] => true,
             _ => false,
+        }
+    }
+
+    pub fn is_won_by(&self, id: PlayerId) -> bool {
+        match id {
+            PlayerId::P1 => self.is_won_by_X(),
+            _            => self.is_won_by_O(),
         }
     }
 }

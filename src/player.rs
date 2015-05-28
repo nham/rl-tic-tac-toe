@@ -22,6 +22,13 @@ impl RLPlayer {
     }
 
     fn lookup_estimate(&self, state: &GameState) -> f64 {
-        unimplemented!()
+        if state.is_won_by(self.player_id) {
+            1.
+        } else if state.is_won_by(self.player_id.next()) {
+            0.
+        } else {
+            // should check hashmap first tho
+            0.5
+        }
     }
 }
