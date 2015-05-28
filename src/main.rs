@@ -2,7 +2,7 @@
 
 use game::{Action, GameState};
 use game::CellState::{self, X, O};
-use player::Player;
+use player::RLPlayer;
 
 mod game;
 mod player;
@@ -26,13 +26,13 @@ enum GameResult {
 
 struct TTTGame<'a> {
     current: PlayerId,
-    players: [&'a Player; 2],
+    players: [&'a RLPlayer; 2],
     gamestate: GameState,
 }
 
 
 impl<'a> TTTGame<'a> {
-    fn new(player1: &'a mut Player, player2: &'a mut Player) -> TTTGame<'a> {
+    fn new(player1: &'a RLPlayer, player2: &'a RLPlayer) -> TTTGame<'a> {
         TTTGame {
             current: PlayerId::P1,
             players: [player1, player2],
@@ -61,7 +61,7 @@ impl<'a> TTTGame<'a> {
         }
     }
 
-    fn current_player(&self) -> &Player {
+    fn current_player(&self) -> &RLPlayer {
         match self.current {
             PlayerId::P1 => self.players[0],
             PlayerId::P2 => self.players[1],

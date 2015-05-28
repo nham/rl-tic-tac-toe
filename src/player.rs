@@ -3,18 +3,12 @@ use std::collections::HashMap;
 use game::{Action, GameState};
 use super::PlayerId;
 
-pub trait Player {
-    fn new(id: PlayerId) -> Self where Self: Sized;
-    fn choose_action(&self, state: &GameState) -> (usize, usize);
-}
-
-
-struct RLPlayer {
+pub struct RLPlayer {
     player_id: PlayerId,
     estimates: HashMap<GameState, f64>,
 }
 
-impl Player for RLPlayer {
+impl RLPlayer {
     fn new(id: PlayerId) -> RLPlayer {
         let mut est = HashMap::new();
         RLPlayer {
@@ -23,10 +17,11 @@ impl Player for RLPlayer {
         }
     }
 
-    fn choose_action(&self, state: &GameState) -> (usize, usize) {
-        (0, 0)
+    pub fn choose_action(&self, state: &GameState) -> (usize, usize) {
+        unimplemented!()
     }
 
     fn lookup_estimate(&self, state: &GameState) -> f64 {
+        unimplemented!()
     }
 }
