@@ -76,30 +76,16 @@ impl<'a> TTTGame<'a> {
     }
     
     fn is_drawn(&self) -> bool {
-        self.gamestate.is_full()
+        self.gamestate.is_drawn()
     }
 
     fn is_won(&self) -> Option<PlayerId> {
-        match *self.gamestate.as_array() {
-            [[X, X, X], _, _]
-            | [_, [X, X, X], _]
-            | [_, _, [X, X, X]]
-            | [[X, _, _], [X, _, _], [X, _, _]]
-            | [[_, X, _], [_, X, _], [_, X, _]]
-            | [[_, _, X], [_, _, X], [_, _, X]]
-            | [[X, _, _], [_, X, _], [_, _, X]]
-            | [[_, _, X], [_, X, _], [X, _, _]] => Some(PlayerId::P1),
-
-            [[O, O, O], _, _]
-            | [_, [O, O, O], _]
-            | [_, _, [O, O, O]]
-            | [[O, _, _], [O, _, _], [O, _, _]]
-            | [[_, O, _], [_, O, _], [_, O, _]]
-            | [[_, _, O], [_, _, O], [_, _, O]]
-            | [[O, _, _], [_, O, _], [_, _, O]]
-            | [[_, _, O], [_, O, _], [O, _, _]] => Some(PlayerId::P2),
-
-            _ => None,
+        if self.gamestate.is_won_by_X() {
+            Some(PlayerId::P1)
+        } else if self.gamestate.is_won_by_O() {
+            Some(PlayerId::P2)
+        } else {
+            None
         }
     }
 }
