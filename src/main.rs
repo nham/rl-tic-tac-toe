@@ -35,6 +35,7 @@ impl<'a> TTTGame<'a> {
     fn play(&mut self) -> GameResult {
         loop {
             self.advance_state();
+
             if let Some(winner) = self.is_won() {
                 return GameResult::Wins(winner)
             }
@@ -53,8 +54,9 @@ impl<'a> TTTGame<'a> {
     }
 
     fn advance_state(&mut self) {
-        let action = self.current_player().take_turn(&self.gamestate);
+        let action = self.current_player().choose_action(&self.gamestate);
         self.gamestate.act_upon(&action);
+        self.current = self.current.next();
     }
     
     fn is_drawn(&self) -> bool {
