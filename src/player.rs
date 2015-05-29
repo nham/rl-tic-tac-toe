@@ -23,15 +23,21 @@ impl RLPlayer {
         unimplemented!()
     }
 
-    fn lookup_estimate(&self, state: &GameState) -> f64 {
+    // (estimate, whether it's in the hash map)
+    fn lookup_estimate(&self, state: &GameState) -> (f64, bool) {
         // if it's in hashmap, assume it's up to date and use it.
-
-        if state.is_won_by(self.player_id) {
-            1.
+        if let Some(&value) = self.estimates.get(state) {
+            (value, true)
+        } else if state.is_won_by(self.player_id) {
+            (1., false)
         } else if state.is_won_by(self.player_id.next()) {
-            0.
+            (0., false)
         } else {
-            0.5
+            (0.5, false)
         }
+    }
+
+    fn add_estimate(&mut self, state: GameState, value: f64) {
+        self.estimates.insert(state, value);
     }
 }
