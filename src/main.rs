@@ -91,6 +91,45 @@ impl<'a> TTTGame<'a> {
 }
 
 
+impl GameState {
+    pub fn is_won_by_X(&self) -> bool {
+        use game::CellState::X;
+        match *self.as_array() {
+            [[X, X, X], _, _]
+            | [_, [X, X, X], _]
+            | [_, _, [X, X, X]]
+            | [[X, _, _], [X, _, _], [X, _, _]]
+            | [[_, X, _], [_, X, _], [_, X, _]]
+            | [[_, _, X], [_, _, X], [_, _, X]]
+            | [[X, _, _], [_, X, _], [_, _, X]]
+            | [[_, _, X], [_, X, _], [X, _, _]] => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_won_by_O(&self) -> bool {
+        use game::CellState::O;
+        match *self.as_array() {
+            [[O, O, O], _, _]
+            | [_, [O, O, O], _]
+            | [_, _, [O, O, O]]
+            | [[O, _, _], [O, _, _], [O, _, _]]
+            | [[_, O, _], [_, O, _], [_, O, _]]
+            | [[_, _, O], [_, _, O], [_, _, O]]
+            | [[O, _, _], [_, O, _], [_, _, O]]
+            | [[_, _, O], [_, O, _], [O, _, _]] => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_won_by(&self, id: PlayerId) -> bool {
+        match id {
+            PlayerId::P1 => self.is_won_by_X(),
+            _            => self.is_won_by_O(),
+        }
+    }
+}
+
 fn main() {
     println!("Hello, world!");
 }
