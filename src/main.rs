@@ -17,6 +17,14 @@ impl PlayerId {
             PlayerId::P2 => PlayerId::P1,
         }
     }
+
+    fn as_cellstate(&self) -> CellState {
+        match *self{
+            PlayerId::P1 => X,
+            PlayerId::P2 => O,
+        }
+    }
+
 }
 
 enum GameResult {
@@ -54,13 +62,6 @@ impl<'a> TTTGame<'a> {
         }
     }
 
-    fn current_XO(&self) -> CellState {
-        match self.current {
-            PlayerId::P1 => X,
-            PlayerId::P2 => O,
-        }
-    }
-
     fn current_player(&self) -> &RLPlayer {
         match self.current {
             PlayerId::P1 => self.players[0],
@@ -70,7 +71,7 @@ impl<'a> TTTGame<'a> {
 
     fn advance_state(&mut self) {
         let (i, j) = self.current_player().choose_action(&self.gamestate);
-        let state = self.current_XO();
+        let state = self.current.as_cellstate();
         self.gamestate.act_upon(&(i, j, state));
         self.current = self.current.next();
     }

@@ -23,6 +23,29 @@ impl RLPlayer {
         unimplemented!()
     }
 
+    fn greedy_action(&self, state: &GameState) -> Option<(usize, usize)> {
+        let max_val = ::std::f64::MIN;
+        let mut max_action: Option<(usize, usize)> = None;
+        for (i, j) in state.available_choices() {
+            let mut candidate = state.clone();
+            candidate.act_upon(&(i, j, self.player_id.as_cellstate()));
+
+            if self.estimate(candidate) > max_val {
+                max_action = Some((i, j));
+            }
+        }
+    }
+
+    fn estimate(&mut self, state: GameState) -> f64 {
+        match self.lookup_estimate(&state) {
+            (val, true) => val,
+            (val, false) => {
+                self.add_estimate(state.clone(), val);
+                val
+            },
+        }
+    }
+
     // (estimate, whether it's in the hash map)
     fn lookup_estimate(&self, state: &GameState) -> (f64, bool) {
         // if it's in hashmap, assume it's up to date and use it.

@@ -21,12 +21,27 @@ impl GameState {
         }
     }
 
+    pub fn get(&self, row: usize, col: usize) -> &CellState {
+        &self.state[row][col]
+    }
+
+    pub fn is_nil(&self, row: usize, col: usize) -> bool {
+        match *self.get(row, col) {
+            CellState::Nil => true,
+            _ => false,
+        }
+    }
+
     pub fn act_upon(&mut self, &(i, j, state): &Action) {
         self.state[i][j] = state;
     }
 
     pub fn as_array(&self) -> &[[CellState; 3]; 3] {
         &self.state
+    }
+
+    pub fn available_choices(&self) -> NilIter {
+        NilIter::new(self)
     }
 
     pub fn is_drawn(&self) -> bool {
@@ -39,6 +54,9 @@ impl GameState {
             }
         }
         true
+    }
+
+    pub fn nil_cells(&self) -> NilIter {
     }
 
     pub fn is_won_by_X(&self) -> bool {
@@ -76,5 +94,31 @@ impl GameState {
             PlayerId::P1 => self.is_won_by_X(),
             _            => self.is_won_by_O(),
         }
+    }
+}
+
+struct NilIter<'a> {
+    count: usize,
+    state: &'a GameState,
+}
+
+impl<'a> Iterator for NilIter<'a> {
+    type Item = (usize, usize);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let (mut row, mut col) = (0, 0);
+        while !self.state.is_nil(row, col) {
+            self.count += 1;
+            let (row, col) = (self.count / 3, self.count % 3);
+        }
+        let result = Some((row, col));
+        self.count += 1;
+        result
+    }
+}
+
+impl <'a> NilIter<'a> {
+    fn new(state: &'a GameState) -> NilIter<'a> {
+        NilIter { count: 0, state: state }
     }
 }
