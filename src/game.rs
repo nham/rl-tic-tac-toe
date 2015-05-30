@@ -100,12 +100,11 @@ impl<'a> Iterator for NilIter<'a> {
     type Item = (usize, usize);
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.count >= 9 {
-            return None;
-        }
         let mut row: usize;
         let mut col: usize;
         loop {
+            if self.count >= 9 { return None; }
+
             row = self.count / 3;
             col = self.count % 3;
 

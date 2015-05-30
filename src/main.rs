@@ -1,5 +1,7 @@
 #![feature(slice_patterns)]
 
+#[macro_use] extern crate log;
+extern crate env_logger;
 extern crate rand;
 
 use game::GameState;
@@ -29,6 +31,7 @@ impl PlayerId {
 
 }
 
+// TODO: impl Display
 #[derive(Debug)]
 enum GameResult {
     Wins(PlayerId),
@@ -53,6 +56,8 @@ impl<'a> TTTGame<'a> {
 
     fn play(&mut self) -> GameResult {
         loop {
+            debug!("{:?}", self.gamestate);
+
             match self.advance_state() {
                 Err(e) => println!("{}", e),
                 _ => {},
@@ -106,8 +111,9 @@ impl<'a> TTTGame<'a> {
 
 
 fn main() {
-    let mut player1 = RLPlayer::new(PlayerId::P1, 0.1);
-    let mut player2 = RLPlayer::new(PlayerId::P2, 0.05);
+    env_logger::init().unwrap();
+    let mut player1 = RLPlayer::new(PlayerId::P1, 0.95);
+    let mut player2 = RLPlayer::new(PlayerId::P2, 0.08);
     let mut game = TTTGame::new(&mut player1, &mut player2);
 
     let result = game.play();

@@ -28,8 +28,10 @@ impl RLPlayer {
         let between = Range::new(0., 1.);
         let k = between.ind_sample(&mut self.rng);
         if k < self.epsilon {
+            debug!("Player {:?} -- exploratory action", self.player_id);
             self.exploratory_action(state)
         } else {
+            debug!("Player {:?} -- greedy action", self.player_id);
             self.greedy_action(state)
         }
     }
