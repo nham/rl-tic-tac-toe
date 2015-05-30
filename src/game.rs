@@ -3,10 +3,10 @@ use super::PlayerId;
 // (row, column). Top-left is (0, 0), bottom-right is (2, 2)
 type Action = (usize, usize, CellState);
 
-#[derive(Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
 pub enum CellState { X, O, Nil }
 
-#[derive(Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
 pub struct GameState {
     state: [[CellState; 3]; 3],
 }
@@ -100,11 +100,20 @@ impl<'a> Iterator for NilIter<'a> {
     type Item = (usize, usize);
 
     fn next(&mut self) -> Option<Self::Item> {
-        let (mut row, mut col) = (0, 0);
-        while !self.state.is_nil(row, col) {
-            self.count += 1;
+        if self.count >= 9 {
+            return None;
+        }
+        let mut row: usize;
+        let mut col: usize;
+        loop {
             row = self.count / 3;
             col = self.count % 3;
+
+            if !self.state.is_nil(row, col) {
+                self.count += 1;
+            } else {
+                break
+            }
         }
         let result = Some((row, col));
         self.count += 1;
