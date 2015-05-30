@@ -56,9 +56,6 @@ impl GameState {
         true
     }
 
-    pub fn nil_cells(&self) -> NilIter {
-    }
-
     pub fn is_won_by_X(&self) -> bool {
         use game::CellState::X;
         match *self.as_array() {

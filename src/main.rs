@@ -1,5 +1,7 @@
 #![feature(slice_patterns)]
 
+extern crate rand;
+
 use game::{Action, GameState};
 use game::CellState::{self, X, O};
 use player::RLPlayer;

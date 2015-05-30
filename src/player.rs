@@ -1,3 +1,5 @@
+use rand;
+use rand::distributions::{IndependentSample, Range};
 use std::collections::HashMap;
 
 use game::{Action, GameState};
@@ -8,6 +10,8 @@ pub struct RLPlayer {
     estimates: HashMap<GameState, f64>,
     epsilon: f64, // for small chance of non-greedy move
 }
+
+type CellCoords = (usize, usize);
 
 impl RLPlayer {
     fn new(id: PlayerId, eps: f64) -> RLPlayer {
@@ -23,16 +27,55 @@ impl RLPlayer {
         unimplemented!()
     }
 
-    fn greedy_action(&self, state: &GameState) -> Option<(usize, usize)> {
-        let max_val = ::std::f64::MIN;
+    //
+    fn exploratory_action(&mut self, state: &GameState) -> Option<(f64, CellCoords)> {
+        let mut max_val = ::std::f64::MIN;
+        let mut actions_values = Vec::new();
+        let mut all_same_value = true;
+        for (i, j) in state.available_choices() {
+            let mut candidate = state.clone();
+            candidate.act_upon(&(i, j, self.player_id.as_cellstate()));
+
+            let estimate = self.estimate(candidate);
+            actions_values.push( (estimate, (i, j)) );
+
+            if estimate > max_val {
+                max_val = estimate;
+                all_same_value = false;
+            }
+        }
+
+        if !all_same_value {
+            actions_values = actions_values.into_iter()
+                                           .filter(|x| x.0 == max_val)
+                                           .collect::<Vec<_>>();
+        }
+
+        // choose random element in actions_values to return
+        let between = Range::new(0, actions_values.len());
+        let mut rng = rand::thread_rng();
+        let k = between.ind_sample(&mut rng);
+        Some(actions_values[k])
+    }
+
+    fn greedy_action(&mut self, state: &GameState) -> Option<(f64, CellCoords)> {
+        let mut max_val = ::std::f64::MIN;
         let mut max_action: Option<(usize, usize)> = None;
         for (i, j) in state.available_choices() {
             let mut candidate = state.clone();
             candidate.act_upon(&(i, j, self.player_id.as_cellstate()));
 
-            if self.estimate(candidate) > max_val {
+            let estimate = self.estimate(candidate);
+
+            if estimate > max_val {
+                max_val = estimate;
                 max_action = Some((i, j));
             }
+        }
+
+        match max_action {
+            Some(action) => Some((max_val, action)),
+            None => None,
         }
     }
 
