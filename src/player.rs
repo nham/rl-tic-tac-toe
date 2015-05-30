@@ -2,33 +2,40 @@ use rand;
 use rand::distributions::{IndependentSample, Range};
 use std::collections::HashMap;
 
-use game::{Action, GameState};
+use game::GameState;
 use super::PlayerId;
 
 pub struct RLPlayer {
     player_id: PlayerId,
     estimates: HashMap<GameState, f64>,
     epsilon: f64, // for small chance of non-greedy move
+    rng: rand::ThreadRng,
 }
 
 type CellCoords = (usize, usize);
 
 impl RLPlayer {
-    fn new(id: PlayerId, eps: f64) -> RLPlayer {
-        let mut est = HashMap::new();
+    pub fn new(id: PlayerId, eps: f64) -> RLPlayer {
         RLPlayer {
             player_id: id,
-            estimates: est,
+            estimates: HashMap::new(),
             epsilon: eps,
+            rng: rand::thread_rng(),
         }
     }
 
-    pub fn choose_action(&self, state: &GameState) -> (usize, usize) {
-        unimplemented!()
+    pub fn choose_action(&mut self, state: &GameState) -> Option<CellCoords> {
+        let between = Range::new(0., 1.);
+        let k = between.ind_sample(&mut self.rng);
+        if k < self.epsilon {
+            self.exploratory_action(state)
+        } else {
+            self.greedy_action(state)
+        }
     }
 
     //
-    fn exploratory_action(&mut self, state: &GameState) -> Option<(f64, CellCoords)> {
+    fn exploratory_action(&mut self, state: &GameState) -> Option<CellCoords> {
         let mut max_val = ::std::f64::MIN;
         let mut actions_values = Vec::new();
         let mut all_same_value = true;
@@ -53,12 +60,11 @@ impl RLPlayer {
 
         // choose random element in actions_values to return
         let between = Range::new(0, actions_values.len());
-        let mut rng = rand::thread_rng();
-        let k = between.ind_sample(&mut rng);
-        Some(actions_values[k])
+        let k = between.ind_sample(&mut self.rng);
+        Some(actions_values[k].1)
     }
 
-    fn greedy_action(&mut self, state: &GameState) -> Option<(f64, CellCoords)> {
+    fn greedy_action(&mut self, state: &GameState) -> Option<CellCoords> {
         let mut max_val = ::std::f64::MIN;
         let mut max_action: Option<(usize, usize)> = None;
         for (i, j) in state.available_choices() {
@@ -74,7 +80,7 @@ impl RLPlayer {
         }
 
         match max_action {
-            Some(action) => Some((max_val, action)),
+            Some(action) => Some(action),
             None => None,
         }
     }

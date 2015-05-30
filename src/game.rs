@@ -1,10 +1,7 @@
 use super::PlayerId;
 
-use std::hash::Hash;
-
-
 // (row, column). Top-left is (0, 0), bottom-right is (2, 2)
-pub type Action = (usize, usize, CellState);
+type Action = (usize, usize, CellState);
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash)]
 pub enum CellState { X, O, Nil }
@@ -106,7 +103,8 @@ impl<'a> Iterator for NilIter<'a> {
         let (mut row, mut col) = (0, 0);
         while !self.state.is_nil(row, col) {
             self.count += 1;
-            let (row, col) = (self.count / 3, self.count % 3);
+            row = self.count / 3;
+            col = self.count % 3;
         }
         let result = Some((row, col));
         self.count += 1;
