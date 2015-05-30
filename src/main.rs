@@ -9,7 +9,7 @@ use player::RLPlayer;
 mod game;
 mod player;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub enum PlayerId { P1, P2 }
 
 impl PlayerId {
@@ -29,6 +29,7 @@ impl PlayerId {
 
 }
 
+#[derive(Debug)]
 enum GameResult {
     Wins(PlayerId),
     Draw,
@@ -108,5 +109,7 @@ fn main() {
     let mut player1 = RLPlayer::new(PlayerId::P1, 0.1);
     let mut player2 = RLPlayer::new(PlayerId::P2, 0.05);
     let mut game = TTTGame::new(&mut player1, &mut player2);
-    game.play();
+
+    let result = game.play();
+    println!("{:?}", result);
 }
