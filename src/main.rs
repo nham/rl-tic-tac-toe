@@ -110,12 +110,15 @@ impl<'a> TTTGame<'a> {
 }
 
 
+const NUM_GAMES: u64 = 5;
+
 fn main() {
     env_logger::init().unwrap();
     let mut player1 = RLPlayer::new(PlayerId::P1, 0.95);
     let mut player2 = RLPlayer::new(PlayerId::P2, 0.08);
     let mut game = TTTGame::new(&mut player1, &mut player2);
 
+    for _ in 0..(NUM_GAMES - 1) { game.play(); }
     let result = game.play();
     println!("{:?}", result);
 }
