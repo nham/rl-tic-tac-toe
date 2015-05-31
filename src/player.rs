@@ -63,6 +63,7 @@ impl RLPlayer {
         // choose random element in actions_values to return
         let between = Range::new(0, actions_values.len());
         let k = between.ind_sample(&mut self.rng);
+        debug!("{} to choose from, chose k = {}", actions_values.len(), k);
         Some(actions_values[k].1)
     }
 

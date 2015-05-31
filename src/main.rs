@@ -59,7 +59,7 @@ impl<'a> TTTGame<'a> {
             debug!("{:?}", self.gamestate);
 
             match self.advance_state() {
-                Err(e) => println!("{}", e),
+                Err(e) => debug!("{}", e),
                 _ => {},
             }
 
@@ -71,6 +71,11 @@ impl<'a> TTTGame<'a> {
                 return GameResult::Draw
             }
         }
+    }
+
+    fn reset(&mut self) {
+        self.current = PlayerId::P1;
+        self.gamestate = GameState::new();
     }
 
     fn current_player(&mut self) -> &mut RLPlayer {
@@ -110,7 +115,7 @@ impl<'a> TTTGame<'a> {
 }
 
 
-const NUM_GAMES: u64 = 5;
+const NUM_GAMES: u64 = 3;
 
 fn main() {
     env_logger::init().unwrap();
@@ -118,7 +123,16 @@ fn main() {
     let mut player2 = RLPlayer::new(PlayerId::P2, 0.08);
     let mut game = TTTGame::new(&mut player1, &mut player2);
 
-    for _ in 0..(NUM_GAMES - 1) { game.play(); }
-    let result = game.play();
-    println!("{:?}", result);
+    let mut p1 = 0;
+    for _ in 0..NUM_GAMES  {
+        match game.play() {
+            GameResult::Wins(PlayerId::P1) => { p1 += 1; },
+            _ => {},
+        }
+        game.reset();
+        debug!("-----");
+    }
+
+    println!("Played {} games.", NUM_GAMES);
+    println!("Wins: P1: {}, P2: {}", p1, NUM_GAMES - p1);
 }
