@@ -115,4 +115,8 @@ impl RLPlayer {
     fn add_estimate(&mut self, state: GameState, value: f64) {
         self.estimates.insert(state, value);
     }
+
+    pub fn update_estimates(&mut self) {
+        // need a history, 
+    }
 }

@@ -1,30 +1,30 @@
 use super::PlayerId;
 
 // (row, column). Top-left is (0, 0), bottom-right is (2, 2)
-type Action = (usize, usize, CellState);
+type Action = (usize, usize, TTTState);
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
-pub enum CellState { X, O, Nil }
+pub enum TTTState { X, O, Nil }
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
 pub struct GameState {
-    state: [[CellState; 3]; 3],
+    state: [[TTTState; 3]; 3],
 }
 
 impl GameState {
     pub fn new() -> GameState {
         GameState {
-            state: [[CellState::Nil; 3]; 3],
+            state: [[TTTState::Nil; 3]; 3],
         }
     }
 
-    pub fn get(&self, row: usize, col: usize) -> &CellState {
+    pub fn get(&self, row: usize, col: usize) -> &TTTState {
         &self.state[row][col]
     }
 
     pub fn is_nil(&self, row: usize, col: usize) -> bool {
         match *self.get(row, col) {
-            CellState::Nil => true,
+            TTTState::Nil => true,
             _ => false,
         }
     }
@@ -33,7 +33,7 @@ impl GameState {
         self.state[i][j] = state;
     }
 
-    pub fn as_array(&self) -> &[[CellState; 3]; 3] {
+    pub fn as_array(&self) -> &[[TTTState; 3]; 3] {
         &self.state
     }
 
@@ -45,7 +45,7 @@ impl GameState {
         for row in self.state.iter() {
             for cell in row.iter() {
                 match *cell {
-                    CellState::Nil => return false,
+                    TTTState::Nil => return false,
                     _ => {},
                 }
             }
@@ -54,7 +54,7 @@ impl GameState {
     }
 
     pub fn is_won_by_X(&self) -> bool {
-        use game::CellState::X;
+        use game::TTTState::X;
         match *self.as_array() {
             [[X, X, X], _, _]
             | [_, [X, X, X], _]
@@ -69,7 +69,7 @@ impl GameState {
     }
 
     pub fn is_won_by_O(&self) -> bool {
-        use game::CellState::O;
+        use game::TTTState::O;
         match *self.as_array() {
             [[O, O, O], _, _]
             | [_, [O, O, O], _]

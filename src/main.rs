@@ -5,7 +5,7 @@ extern crate env_logger;
 extern crate rand;
 
 use game::GameState;
-use game::CellState::{self, X, O};
+use game::TTTState::{self, X, O};
 use player::RLPlayer;
 
 mod game;
@@ -22,7 +22,7 @@ impl PlayerId {
         }
     }
 
-    fn as_cellstate(&self) -> CellState {
+    fn as_cellstate(&self) -> TTTState {
         match *self{
             PlayerId::P1 => X,
             PlayerId::P2 => O,
@@ -98,6 +98,12 @@ impl<'a> TTTGame<'a> {
             None => Err("No actions left. Cannot advance state."),
         }
     }
+
+    pub fn update_estimates(&mut self) {
+        for i in 0..2 {
+            self.players[i].update_estimates();
+        }
+    }
     
     fn is_drawn(&self) -> bool {
         self.gamestate.is_drawn()
@@ -115,7 +121,7 @@ impl<'a> TTTGame<'a> {
 }
 
 
-const NUM_GAMES: u64 = 3;
+const NUM_GAMES: u64 = 8;
 
 fn main() {
     env_logger::init().unwrap();
@@ -132,6 +138,8 @@ fn main() {
         game.reset();
         debug!("-----");
     }
+
+    game.update_estimates();
 
     println!("Played {} games.", NUM_GAMES);
     println!("Wins: P1: {}, P2: {}", p1, NUM_GAMES - p1);
