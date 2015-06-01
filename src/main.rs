@@ -58,7 +58,7 @@ impl<'a> TTTGame<'a> {
         loop {
             debug!("{:?}", self.gamestate);
 
-            match self.advance_state() {
+            match self.player_action() {
                 Err(e) => debug!("{}", e),
                 _ => {},
             }
@@ -89,16 +89,17 @@ impl<'a> TTTGame<'a> {
         self.current.as_cellstate()
     }
 
-    fn advance_state(&mut self) -> Result<(), &'static str> {
+    fn player_action(&mut self) -> Result<(), &'static str> {
         let state = self.gamestate; // choose_action() borrows mutably, so this is on a
                                     // separate line
         match self.current_player().choose_action(&state) {
             Some((i, j)) => {
-                self.gamestate.set_cell(i, j, self.current_XO());
+                let xo = self.current_XO();
+                self.gamestate.set_cell(i, j, xo);
                 self.current = self.current.next();
                 Ok(())
             },
-            None => Err("No actions left. Cannot advance state."),
+            None => Err("No remaining actions."),
         }
     }
 
