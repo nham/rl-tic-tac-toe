@@ -7,31 +7,31 @@ type Action = (usize, usize, TTTCell);
 pub enum TTTCell { X, O, Nil }
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
-pub struct GameState {
+pub struct Board {
     state: [[TTTCell; 3]; 3],
 }
 
-impl GameState {
-    pub fn new() -> GameState {
-        GameState {
+impl Board {
+    pub fn new() -> Board {
+        Board {
             state: [[TTTCell::Nil; 3]; 3],
         }
     }
 
     fn check_index_out_of_bounds(method: &'static str, row: usize, col: usize) {
         if row > 2 || col > 2 {
-            panic!("GameState::{} index out of bounds, row: {}, col: {}",
+            panic!("Board::{} index out of bounds, row: {}, col: {}",
                    method, row, col);
         }
     }
 
     pub fn get(&self, row: usize, col: usize) -> &TTTCell {
-        GameState::check_index_out_of_bounds("get", row, col);
+        Board::check_index_out_of_bounds("get", row, col);
         &self.state[row][col]
     }
 
     pub fn is_nil(&self, row: usize, col: usize) -> bool {
-        GameState::check_index_out_of_bounds("is_nil", row, col);
+        Board::check_index_out_of_bounds("is_nil", row, col);
 
         match *self.get(row, col) {
             TTTCell::Nil => true,
@@ -40,7 +40,7 @@ impl GameState {
     }
 
     pub fn act_upon(&mut self, &(i, j, state): &Action) {
-        GameState::check_index_out_of_bounds("act_upon", i, j);
+        Board::check_index_out_of_bounds("act_upon", i, j);
         self.state[i][j] = state;
     }
 
@@ -101,7 +101,7 @@ impl GameState {
 
 struct NilIter<'a> {
     count: usize,
-    state: &'a GameState,
+    state: &'a Board,
 }
 
 impl<'a> Iterator for NilIter<'a> {
@@ -129,7 +129,7 @@ impl<'a> Iterator for NilIter<'a> {
 }
 
 impl <'a> NilIter<'a> {
-    fn new(state: &'a GameState) -> NilIter<'a> {
+    fn new(state: &'a Board) -> NilIter<'a> {
         NilIter { count: 0, state: state }
     }
 }

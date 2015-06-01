@@ -2,12 +2,12 @@ use rand;
 use rand::distributions::{IndependentSample, Range};
 use std::collections::HashMap;
 
-use game::GameState;
+use game::Board;
 use super::PlayerId;
 
 pub struct RLPlayer {
     player_id: PlayerId,
-    estimates: HashMap<GameState, f64>,
+    estimates: HashMap<Board, f64>,
     epsilon: f64, // for small chance of non-greedy move
     rng: rand::ThreadRng,
 }
@@ -24,7 +24,7 @@ impl RLPlayer {
         }
     }
 
-    pub fn choose_action(&mut self, state: &GameState) -> Option<CellCoords> {
+    pub fn choose_action(&mut self, state: &Board) -> Option<CellCoords> {
         let between = Range::new(0., 1.);
         let k = between.ind_sample(&mut self.rng);
         if k < self.epsilon {
@@ -37,7 +37,7 @@ impl RLPlayer {
     }
 
     //
-    fn exploratory_action(&mut self, state: &GameState) -> Option<CellCoords> {
+    fn exploratory_action(&mut self, state: &Board) -> Option<CellCoords> {
         let mut max_val = ::std::f64::MIN;
         let mut actions_values = Vec::new();
         let mut all_same_value = true;
@@ -67,7 +67,7 @@ impl RLPlayer {
         Some(actions_values[k].1)
     }
 
-    fn greedy_action(&mut self, state: &GameState) -> Option<CellCoords> {
+    fn greedy_action(&mut self, state: &Board) -> Option<CellCoords> {
         let mut max_val = ::std::f64::MIN;
         let mut max_action: Option<(usize, usize)> = None;
         for (i, j) in state.available_choices() {
@@ -88,7 +88,7 @@ impl RLPlayer {
         }
     }
 
-    fn estimate(&mut self, state: GameState) -> f64 {
+    fn estimate(&mut self, state: Board) -> f64 {
         match self.lookup_estimate(&state) {
             (val, true) => val,
             (val, false) => {
@@ -99,7 +99,7 @@ impl RLPlayer {
     }
 
     // (estimate, whether it's in the hash map)
-    fn lookup_estimate(&self, state: &GameState) -> (f64, bool) {
+    fn lookup_estimate(&self, state: &Board) -> (f64, bool) {
         // if it's in hashmap, assume it's up to date and use it.
         if let Some(&value) = self.estimates.get(state) {
             (value, true)
@@ -112,7 +112,7 @@ impl RLPlayer {
         }
     }
 
-    fn add_estimate(&mut self, state: GameState, value: f64) {
+    fn add_estimate(&mut self, state: Board, value: f64) {
         self.estimates.insert(state, value);
     }
 

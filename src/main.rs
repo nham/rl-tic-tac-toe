@@ -4,7 +4,7 @@
 extern crate env_logger;
 extern crate rand;
 
-use game::GameState;
+use game::Board;
 use game::TTTCell::{self, X, O};
 use player::RLPlayer;
 
@@ -41,7 +41,7 @@ enum GameResult {
 struct TTTGame<'a> {
     current: PlayerId,
     players: [&'a mut RLPlayer; 2],
-    gamestate: GameState,
+    gamestate: Board,
 }
 
 
@@ -50,7 +50,7 @@ impl<'a> TTTGame<'a> {
         TTTGame {
             current: PlayerId::P1,
             players: [player1, player2],
-            gamestate: GameState::new(),
+            gamestate: Board::new(),
         }
     }
 
@@ -75,7 +75,7 @@ impl<'a> TTTGame<'a> {
 
     fn reset(&mut self) {
         self.current = PlayerId::P1;
-        self.gamestate = GameState::new();
+        self.gamestate = Board::new();
     }
 
     fn current_player(&mut self) -> &mut RLPlayer {
