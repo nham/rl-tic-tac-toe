@@ -85,13 +85,16 @@ impl<'a> TTTGame<'a> {
         }
     }
 
+    fn current_XO(&mut self) -> TTTCell {
+        self.current.as_cellstate()
+    }
+
     fn advance_state(&mut self) -> Result<(), &'static str> {
         let state = self.gamestate; // choose_action() borrows mutably, so this is on a
                                     // separate line
         match self.current_player().choose_action(&state) {
             Some((i, j)) => {
-                let cell = self.current.as_cellstate();
-                self.gamestate.set_cell(i, j, cell);
+                self.gamestate.set_cell(i, j, self.current_XO());
                 self.current = self.current.next();
                 Ok(())
             },
