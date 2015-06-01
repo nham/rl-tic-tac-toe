@@ -39,9 +39,9 @@ impl Board {
         }
     }
 
-    pub fn act_upon(&mut self, &(i, j, state): &Action) {
-        Board::check_index_out_of_bounds("act_upon", i, j);
-        self.state[i][j] = state;
+    pub fn set_cell(&mut self, row: usize, col: usize, cell: TTTCell) {
+        Board::check_index_out_of_bounds("act_upon", row, col);
+        self.state[row][col] = cell;
     }
 
     pub fn as_array(&self) -> &[[TTTCell; 3]; 3] {

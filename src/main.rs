@@ -90,8 +90,8 @@ impl<'a> TTTGame<'a> {
                                     // separate line
         match self.current_player().choose_action(&state) {
             Some((i, j)) => {
-                let state = self.current.as_cellstate();
-                self.gamestate.act_upon(&(i, j, state));
+                let cell = self.current.as_cellstate();
+                self.gamestate.set_cell(i, j, cell);
                 self.current = self.current.next();
                 Ok(())
             },
