@@ -5,7 +5,7 @@ extern crate env_logger;
 extern crate rand;
 
 use game::GameState;
-use game::TTTState::{self, X, O};
+use game::TTTCell::{self, X, O};
 use player::RLPlayer;
 
 mod game;
@@ -22,7 +22,7 @@ impl PlayerId {
         }
     }
 
-    fn as_cellstate(&self) -> TTTState {
+    fn as_cellstate(&self) -> TTTCell {
         match *self{
             PlayerId::P1 => X,
             PlayerId::P2 => O,
