@@ -18,19 +18,20 @@ impl GameState {
         }
     }
 
-    pub fn get(&self, row: usize, col: usize) -> &TTTCell {
+    fn check_index_out_of_bounds(method: &'static str, row: usize, col: usize) {
         if row > 2 || col > 2 {
-            panic!("GameState::get index out of bounds, row: {}, col: {}",
-                   row, col);
+            panic!("GameState::{} index out of bounds, row: {}, col: {}",
+                   method, row, col);
         }
+    }
+
+    pub fn get(&self, row: usize, col: usize) -> &TTTCell {
+        GameState::check_index_out_of_bounds("get", row, col);
         &self.state[row][col]
     }
 
     pub fn is_nil(&self, row: usize, col: usize) -> bool {
-        if row > 2 || col > 2 {
-            panic!("GameState::is_nil index out of bounds, row: {}, col: {}",
-                   row, col);
-        }
+        GameState::check_index_out_of_bounds("is_nil", row, col);
 
         match *self.get(row, col) {
             TTTCell::Nil => true,
@@ -39,10 +40,7 @@ impl GameState {
     }
 
     pub fn act_upon(&mut self, &(i, j, state): &Action) {
-        if i > 2 || i > 2 {
-            panic!("GameState::act_upon index out of bounds, row: {}, col: {}",
-                   i, j);
-        }
+        GameState::check_index_out_of_bounds("act_upon", i, j);
         self.state[i][j] = state;
     }
 
@@ -66,8 +64,17 @@ impl GameState {
         true
     }
 
-    pub fn is_won_by_X(&self) -> bool {
-        use game::TTTCell::X;
+    pub fn is_won_by(&self, id: PlayerId) -> bool {
+        match self.is_won() {
+            Some(player) => id == player,
+            None => false,
+        }
+    }
+
+    // Assumes that only one player has won (which is only meaningful way
+    // to call this)
+    pub fn is_won(&self) -> Option<PlayerId> {
+        use game::TTTCell::{X, O};
         match *self.as_array() {
             [[X, X, X], _, _]
             | [_, [X, X, X], _]
@@ -76,14 +83,8 @@ impl GameState {
             | [[_, X, _], [_, X, _], [_, X, _]]
             | [[_, _, X], [_, _, X], [_, _, X]]
             | [[X, _, _], [_, X, _], [_, _, X]]
-            | [[_, _, X], [_, X, _], [X, _, _]] => true,
-            _ => false,
-        }
-    }
+            | [[_, _, X], [_, X, _], [X, _, _]] => Some(PlayerId::P1),
 
-    pub fn is_won_by_O(&self) -> bool {
-        use game::TTTCell::O;
-        match *self.as_array() {
             [[O, O, O], _, _]
             | [_, [O, O, O], _]
             | [_, _, [O, O, O]]
@@ -91,15 +92,9 @@ impl GameState {
             | [[_, O, _], [_, O, _], [_, O, _]]
             | [[_, _, O], [_, _, O], [_, _, O]]
             | [[O, _, _], [_, O, _], [_, _, O]]
-            | [[_, _, O], [_, O, _], [O, _, _]] => true,
-            _ => false,
-        }
-    }
+            | [[_, _, O], [_, O, _], [O, _, _]] => Some(PlayerId::P2),
 
-    pub fn is_won_by(&self, id: PlayerId) -> bool {
-        match id {
-            PlayerId::P1 => self.is_won_by_X(),
-            _            => self.is_won_by_O(),
+            _ => None,
         }
     }
 }

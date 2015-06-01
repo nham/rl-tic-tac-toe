@@ -11,7 +11,7 @@ use player::RLPlayer;
 mod game;
 mod player;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum PlayerId { P1, P2 }
 
 impl PlayerId {
@@ -110,13 +110,7 @@ impl<'a> TTTGame<'a> {
     }
 
     fn is_won(&self) -> Option<PlayerId> {
-        if self.gamestate.is_won_by_X() {
-            Some(PlayerId::P1)
-        } else if self.gamestate.is_won_by_O() {
-            Some(PlayerId::P2)
-        } else {
-            None
-        }
+        self.gamestate.is_won()
     }
 }
 
