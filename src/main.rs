@@ -41,7 +41,7 @@ enum GameResult {
 struct TTTGame<'a> {
     current: PlayerId,
     players: [&'a mut RLPlayer; 2],
-    gamestate: Board,
+    board: Board,
 }
 
 
@@ -50,13 +50,13 @@ impl<'a> TTTGame<'a> {
         TTTGame {
             current: PlayerId::P1,
             players: [player1, player2],
-            gamestate: Board::new(),
+            board: Board::new(),
         }
     }
 
     fn play(&mut self) -> GameResult {
         loop {
-            debug!("{:?}", self.gamestate);
+            debug!("{:?}", self.board);
 
             match self.player_action() {
                 Err(e) => debug!("{}", e),
@@ -75,7 +75,7 @@ impl<'a> TTTGame<'a> {
 
     fn reset(&mut self) {
         self.current = PlayerId::P1;
-        self.gamestate = Board::new();
+        self.board = Board::new();
     }
 
     fn current_player(&mut self) -> &mut RLPlayer {
@@ -90,12 +90,12 @@ impl<'a> TTTGame<'a> {
     }
 
     fn player_action(&mut self) -> Result<(), &'static str> {
-        let state = self.gamestate; // choose_action() borrows mutably, so this is on a
+        let state = self.board; // choose_action() borrows mutably, so this is on a
                                     // separate line
         match self.current_player().choose_action(&state) {
             Some((i, j)) => {
                 let xo = self.current_XO();
-                self.gamestate.set_cell(i, j, xo);
+                self.board.set_cell(i, j, xo);
                 self.current = self.current.next();
                 Ok(())
             },
@@ -110,11 +110,11 @@ impl<'a> TTTGame<'a> {
     }
     
     fn is_drawn(&self) -> bool {
-        self.gamestate.is_drawn()
+        self.board.is_drawn()
     }
 
     fn is_won(&self) -> Option<PlayerId> {
-        self.gamestate.is_won()
+        self.board.is_won()
     }
 }
 
@@ -133,11 +133,10 @@ fn main() {
             GameResult::Wins(PlayerId::P1) => { p1 += 1; },
             _ => {},
         }
+        game.update_estimates();
         game.reset();
         debug!("-----");
     }
-
-    game.update_estimates();
 
     println!("Played {} games.", NUM_GAMES);
     println!("Wins: P1: {}, P2: {}", p1, NUM_GAMES - p1);
