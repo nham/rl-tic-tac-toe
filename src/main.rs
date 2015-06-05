@@ -5,7 +5,7 @@ extern crate env_logger;
 extern crate rand;
 
 use game::Board;
-use game::TTTCell::{self, X, O};
+use game::Cell::{self, X, O};
 use player::RLPlayer;
 
 mod game;
@@ -22,7 +22,7 @@ impl PlayerId {
         }
     }
 
-    fn as_cellstate(&self) -> TTTCell {
+    fn as_cell(&self) -> Cell {
         match *self{
             PlayerId::P1 => X,
             PlayerId::P2 => O,
@@ -85,10 +85,6 @@ impl<'a> TTTGame<'a> {
         }
     }
 
-    fn current_XO(&mut self) -> TTTCell {
-        self.current.as_cellstate()
-    }
-
     fn player_action(&mut self) -> Result<(), &'static str> {
         let board = self.board; // appeasing the borrow checker
         match self.current_player().choose_action(&board) {
@@ -102,8 +98,8 @@ impl<'a> TTTGame<'a> {
     }
 
     fn current_player_mark_cell(&mut self, row: usize, col: usize) {
-        let xo = self.current_XO();
-        self.board.set_cell(row, col, xo);
+        let mark = self.current.as_cell();
+        self.board.set_cell(row, col, mark);
     }
 
     fn next_player(&mut self) {

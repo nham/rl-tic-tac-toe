@@ -43,7 +43,7 @@ impl RLPlayer {
         let mut all_same_value = true;
         for (i, j) in state.available_choices() {
             let mut candidate = state.clone();
-            candidate.set_cell(i, j, self.player_id.as_cellstate());
+            candidate.set_cell(i, j, self.player_id.as_cell());
 
             let estimate = self.estimate(candidate);
             actions_values.push( (estimate, (i, j)) );
@@ -72,7 +72,7 @@ impl RLPlayer {
         let mut max_action: Option<(usize, usize)> = None;
         for (i, j) in state.available_choices() {
             let mut candidate = state.clone();
-            candidate.set_cell(i, j, self.player_id.as_cellstate());
+            candidate.set_cell(i, j, self.player_id.as_cell());
 
             let estimate = self.estimate(candidate);
 

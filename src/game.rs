@@ -1,20 +1,20 @@
 use super::PlayerId;
 
 // (row, column). Top-left is (0, 0), bottom-right is (2, 2)
-type Action = (usize, usize, TTTCell);
+type Action = (usize, usize, Cell);
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
-pub enum TTTCell { X, O, Nil }
+pub enum Cell { X, O, Nil }
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
 pub struct Board {
-    state: [[TTTCell; 3]; 3],
+    state: [[Cell; 3]; 3],
 }
 
 impl Board {
     pub fn new() -> Board {
         Board {
-            state: [[TTTCell::Nil; 3]; 3],
+            state: [[Cell::Nil; 3]; 3],
         }
     }
 
@@ -25,7 +25,7 @@ impl Board {
         }
     }
 
-    pub fn get(&self, row: usize, col: usize) -> &TTTCell {
+    pub fn get(&self, row: usize, col: usize) -> &Cell {
         Board::check_index_out_of_bounds("get", row, col);
         &self.state[row][col]
     }
@@ -34,17 +34,17 @@ impl Board {
         Board::check_index_out_of_bounds("is_nil", row, col);
 
         match *self.get(row, col) {
-            TTTCell::Nil => true,
+            Cell::Nil => true,
             _ => false,
         }
     }
 
-    pub fn set_cell(&mut self, row: usize, col: usize, cell: TTTCell) {
+    pub fn set_cell(&mut self, row: usize, col: usize, cell: Cell) {
         Board::check_index_out_of_bounds("act_upon", row, col);
         self.state[row][col] = cell;
     }
 
-    pub fn as_array(&self) -> &[[TTTCell; 3]; 3] {
+    pub fn as_array(&self) -> &[[Cell; 3]; 3] {
         &self.state
     }
 
@@ -56,7 +56,7 @@ impl Board {
         for row in self.state.iter() {
             for cell in row.iter() {
                 match *cell {
-                    TTTCell::Nil => return false,
+                    Cell::Nil => return false,
                     _ => {},
                 }
             }
@@ -74,7 +74,7 @@ impl Board {
     // Assumes that only one player has won (which is only meaningful way
     // to call this)
     pub fn is_won(&self) -> Option<PlayerId> {
-        use game::TTTCell::{X, O};
+        use game::Cell::{X, O};
         match *self.as_array() {
             [[X, X, X], _, _]
             | [_, [X, X, X], _]
