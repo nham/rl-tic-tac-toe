@@ -90,17 +90,24 @@ impl<'a> TTTGame<'a> {
     }
 
     fn player_action(&mut self) -> Result<(), &'static str> {
-        let state = self.board; // choose_action() borrows mutably, so this is on a
-                                    // separate line
-        match self.current_player().choose_action(&state) {
+        let board = self.board; // appeasing the borrow checker
+        match self.current_player().choose_action(&board) {
             Some((i, j)) => {
-                let xo = self.current_XO();
-                self.board.set_cell(i, j, xo);
-                self.current = self.current.next();
+                self.current_player_mark_cell(i, j);
+                self.next_player();
                 Ok(())
             },
             None => Err("No remaining actions."),
         }
+    }
+
+    fn current_player_mark_cell(&mut self, row: usize, col: usize) {
+        let xo = self.current_XO();
+        self.board.set_cell(row, col, xo);
+    }
+
+    fn next_player(&mut self) {
+        self.current = self.current.next();
     }
 
     pub fn update_estimates(&mut self) {
