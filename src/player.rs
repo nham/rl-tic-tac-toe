@@ -5,11 +5,15 @@ use std::collections::HashMap;
 use game::Board;
 use super::PlayerId;
 
+const ALPHA: f64 = 0.1;
+
+// temporal difference learner
 pub struct RLPlayer {
     player_id: PlayerId,
     estimates: HashMap<Board, f64>,
     epsilon: f64, // for small chance of non-greedy move
     rng: rand::ThreadRng,
+    alpha: f64, // "step size parameter"
 }
 
 type CellCoords = (usize, usize);
@@ -21,6 +25,7 @@ impl RLPlayer {
             estimates: HashMap::new(),
             epsilon: eps,
             rng: rand::thread_rng(),
+            alpha: ALPHA,
         }
     }
 
@@ -45,7 +50,7 @@ impl RLPlayer {
             let mut candidate = state.clone();
             candidate.set_cell(i, j, self.player_id.as_cell());
 
-            let estimate = self.estimate(candidate);
+            let estimate = self.estimate(&candidate);
             actions_values.push( (estimate, (i, j)) );
 
             if estimate > max_val {
@@ -74,7 +79,7 @@ impl RLPlayer {
             let mut candidate = state.clone();
             candidate.set_cell(i, j, self.player_id.as_cell());
 
-            let estimate = self.estimate(candidate);
+            let estimate = self.estimate(&candidate);
 
             if estimate > max_val {
                 max_val = estimate;
@@ -88,8 +93,8 @@ impl RLPlayer {
         }
     }
 
-    fn estimate(&mut self, state: Board) -> f64 {
-        match self.lookup_estimate(&state) {
+    pub fn estimate(&mut self, state: &Board) -> f64 {
+        match self.lookup_estimate(state) {
             (val, true) => val,
             (val, false) => {
                 self.add_estimate(state.clone(), val);
@@ -116,7 +121,22 @@ impl RLPlayer {
         self.estimates.insert(state, value);
     }
 
-    pub fn update_estimates(&mut self) {
-        // need a history, 
+    fn update_estimate(&mut self, state: &Board, value: f64) -> Result<(), &'static str> {
+        if let Some(estimate) = self.estimates.get_mut(state) {
+            *estimate = value;
+            Ok(())
+        } else {
+            Err("estimate not set, call add_estimate instead")
+        }
+    }
+
+    fn calc_new_estimate(&self, state1: &Board, state2: &Board) -> f64 {
+        let estimate1 = self.estimate(state1);
+        let estimate2 = self.estimate(state2);
+        estimate1 + self.alpha * (estimate2 - estimate1)
+    }
+
+    pub fn calc_and_update(&mut self, state1: &Board, state2: &Board) {
+        self.update_estimate(state1, self.calc_new_estimate(state1, state2)).unwrap();
     }
 }

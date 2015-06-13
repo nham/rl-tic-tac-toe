@@ -106,12 +106,6 @@ impl<'a> TTTGame<'a> {
         self.current = self.current.next();
     }
 
-    pub fn update_estimates(&mut self) {
-        for i in 0..2 {
-            self.players[i].update_estimates();
-        }
-    }
-    
     fn is_drawn(&self) -> bool {
         self.board.is_drawn()
     }
@@ -136,7 +130,6 @@ fn main() {
             GameResult::Wins(PlayerId::P1) => { p1 += 1; },
             _ => {},
         }
-        game.update_estimates();
         game.reset();
         debug!("-----");
     }
