@@ -120,7 +120,7 @@ impl<'a> TTTGame<'a> {
 }
 
 
-const NUM_GAMES: u64 = 8;
+const NUM_GAMES: u64 = 10;
 
 fn main() {
     env_logger::init().unwrap();
@@ -135,7 +135,8 @@ fn main() {
             _ => {},
         }
         game.reset();
-        debug!("-----");
+        debug!("------------------------");
+        debug!("------------------------");
     }
 
     println!("Played {} games.", NUM_GAMES);
