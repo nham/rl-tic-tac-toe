@@ -50,7 +50,7 @@ impl RLPlayer {
             let mut candidate = state.clone();
             candidate.set_cell(i, j, self.player_id.as_cell());
 
-            let estimate = self.estimate(&candidate);
+            let estimate = self.estimate_and_add(candidate);
             actions_values.push( (estimate, (i, j)) );
 
             if estimate > max_val {
@@ -79,7 +79,7 @@ impl RLPlayer {
             let mut candidate = state.clone();
             candidate.set_cell(i, j, self.player_id.as_cell());
 
-            let estimate = self.estimate(&candidate);
+            let estimate = self.estimate_and_add(candidate);
 
             if estimate > max_val {
                 max_val = estimate;
@@ -93,14 +93,18 @@ impl RLPlayer {
         }
     }
 
-    pub fn estimate(&mut self, state: &Board) -> f64 {
-        match self.lookup_estimate(state) {
+    fn estimate_and_add(&mut self, state: Board) -> f64 {
+        match self.lookup_estimate(&state) {
             (val, true) => val,
             (val, false) => {
                 self.add_estimate(state.clone(), val);
                 val
             },
         }
+    }
+
+    fn estimate(&self, state: &Board) -> f64 {
+        self.lookup_estimate(state).0
     }
 
     // (estimate, whether it's in the hash map)
@@ -136,7 +140,8 @@ impl RLPlayer {
         estimate1 + self.alpha * (estimate2 - estimate1)
     }
 
-    pub fn calc_and_update(&mut self, state1: &Board, state2: &Board) {
-        self.update_estimate(state1, self.calc_new_estimate(state1, state2)).unwrap();
+    pub fn update_after_action(&mut self, state1: &Board, state2: &Board) {
+        let new_estimate = self.calc_new_estimate(state1, state2);
+        self.update_estimate(state1, new_estimate).unwrap();
     }
 }

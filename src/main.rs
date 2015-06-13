@@ -86,10 +86,14 @@ impl<'a> TTTGame<'a> {
     }
 
     fn player_action(&mut self) -> Result<(), &'static str> {
+        // FIXME: bad because it copies
         let board = self.board; // appeasing the borrow checker
         match self.current_player().choose_action(&board) {
             Some((i, j)) => {
                 self.current_player_mark_cell(i, j);
+                // FIXME: bad because it copies
+                let new_board = self.board;
+                self.current_player().update_after_action(&board, &new_board);
                 self.next_player();
                 Ok(())
             },
