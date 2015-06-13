@@ -30,6 +30,7 @@ impl RLPlayer {
     }
 
     pub fn choose_action(&mut self, state: &Board) -> Option<CellCoords> {
+        self.estimate_and_add(*state);
         let between = Range::new(0., 1.);
         let k = between.ind_sample(&mut self.rng);
         if k < self.epsilon {
