@@ -1,3 +1,4 @@
+use std::fmt;
 use super::PlayerId;
 
 // (row, column). Top-left is (0, 0), bottom-right is (2, 2)
@@ -6,9 +7,24 @@ type Action = (usize, usize, Cell);
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
 pub enum Cell { X, O, Nil }
 
-#[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash)]
 pub struct Board {
     state: [[Cell; 3]; 3],
+}
+
+impl fmt::Debug for Board {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        try!(write!(f, "["));
+        for row in self.state.iter() {
+            for cell in row.iter() {
+                match *cell {
+                    Cell::Nil => try!(write!(f, "_")),
+                    _ => try!(write!(f, "{:?}", cell)),
+                }
+            }
+        }
+        write!(f, "]")
+    }
 }
 
 impl Board {
@@ -122,6 +138,7 @@ impl<'a> Iterator for NilIter<'a> {
                 break
             }
         }
+        debug!("NilIter::next(), (row, col) = ({}, {})", row, col);
         let result = Some((row, col));
         self.count += 1;
         result

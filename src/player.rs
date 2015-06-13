@@ -69,7 +69,7 @@ impl RLPlayer {
         // choose random element in actions_values to return
         let between = Range::new(0, actions_values.len());
         let k = between.ind_sample(&mut self.rng);
-        debug!("exploratory action: {} to choose from, chose k = {}", actions_values.len(), k);
+        debug!("exploratory action: {} to choose from, chose {:?} (k = {})", actions_values.len(), actions_values[k].1, k);
         Some(actions_values[k].1)
     }
 
@@ -145,5 +145,12 @@ impl RLPlayer {
         let new_estimate = self.calc_new_estimate(state1, state2);
         debug!("update_after_action: new_estimate = {}", new_estimate);
         self.update_estimate(state1, new_estimate).unwrap();
+    }
+
+    pub fn print_estimates(&self) {
+        println!("estimates:");
+        for (k, v) in self.estimates.iter() {
+            println!("  {:?} {:?}", k, v);
+        }
     }
 }

@@ -1,3 +1,4 @@
+#![crate_name = "rl_tic_tac_toe"]
 #![feature(slice_patterns)]
 
 #[macro_use] extern crate log;
@@ -94,6 +95,7 @@ impl<'a> TTTGame<'a> {
                 // FIXME: bad because it copies
                 let new_board = self.board;
                 self.current_player().update_after_action(&board, &new_board);
+                self.current_player().print_estimates();
                 self.next_player();
                 Ok(())
             },
@@ -120,7 +122,7 @@ impl<'a> TTTGame<'a> {
 }
 
 
-const NUM_GAMES: u64 = 10;
+const NUM_GAMES: u64 = 1;
 
 fn main() {
     env_logger::init().unwrap();
