@@ -30,6 +30,7 @@ impl RLPlayer {
     }
 
     pub fn choose_action(&mut self, state: &Board) -> Option<CellCoords> {
+        debug!("STARTING choose_action");
         self.estimate_and_add(*state);
         let between = Range::new(0., 1.);
         let k = between.ind_sample(&mut self.rng);
@@ -47,6 +48,7 @@ impl RLPlayer {
         let mut max_val = ::std::f64::MIN;
         let mut actions_values = Vec::new();
         let mut all_same_value = true;
+        debug!("STARTING loop exploratory_action");
         for (i, j) in state.available_choices() {
             let mut candidate = state.clone();
             candidate.set_cell(i, j, self.player_id.as_cell());
@@ -76,6 +78,8 @@ impl RLPlayer {
     fn greedy_action(&mut self, state: &Board) -> Option<CellCoords> {
         let mut max_val = ::std::f64::MIN;
         let mut max_action: Option<(usize, usize)> = None;
+        debug!("\nSTARTING loop greedy_action\n======");
+        self.print_estimates();
         for (i, j) in state.available_choices() {
             let mut candidate = state.clone();
             candidate.set_cell(i, j, self.player_id.as_cell());
@@ -98,6 +102,7 @@ impl RLPlayer {
         match self.lookup_estimate(&state) {
             (val, true) => val,
             (val, false) => {
+                debug!("adding {:?} to map",  &state);
                 self.add_estimate(state.clone(), val);
                 val
             },
@@ -123,11 +128,13 @@ impl RLPlayer {
     }
 
     fn add_estimate(&mut self, state: Board, value: f64) {
+        debug!("add_estimate: state = {:?}", &state);
         self.estimates.insert(state, value);
     }
 
     fn update_estimate(&mut self, state: &Board, value: f64) -> Result<(), &'static str> {
         if let Some(estimate) = self.estimates.get_mut(state) {
+            debug!("update_estimate: state = {:?}", state);
             *estimate = value;
             Ok(())
         } else {
@@ -148,9 +155,9 @@ impl RLPlayer {
     }
 
     pub fn print_estimates(&self) {
-        println!("estimates:");
+        debug!("estimates ({:?}):", self.player_id);
         for (k, v) in self.estimates.iter() {
-            println!("  {:?} {:?}", k, v);
+            debug!("  {:?} {:?}", k, v);
         }
     }
 }

@@ -56,13 +56,14 @@ impl<'a> TTTGame<'a> {
     }
 
     fn play(&mut self) -> GameResult {
+        debug!("play, board: {:?}", self.board);
         loop {
-            debug!("{:?}", self.board);
-
             match self.player_action() {
                 Err(e) => debug!("{}", e),
                 _ => {},
             }
+
+            debug!("play, board: {:?}", self.board);
 
             if let Some(winner) = self.is_won() {
                 return GameResult::Wins(winner)
@@ -122,7 +123,7 @@ impl<'a> TTTGame<'a> {
 }
 
 
-const NUM_GAMES: u64 = 1;
+const NUM_GAMES: u64 = 500;
 
 fn main() {
     env_logger::init().unwrap();
