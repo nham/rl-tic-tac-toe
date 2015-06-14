@@ -1,6 +1,9 @@
 use rand;
 use rand::distributions::{IndependentSample, Range};
 use std::collections::{HashMap, hash_map};
+use std::fs::File;
+use std::io::{self, BufRead, BufReader};
+use std::str::FromStr;
 
 use game::Board;
 use super::PlayerId;
@@ -27,6 +30,32 @@ impl RLPlayer {
             rng: rand::thread_rng(),
             alpha: ALPHA,
         }
+    }
+
+    pub fn from_file(id: PlayerId) -> io::Result<RLPlayer> {
+        let f = try!(File::open(super::ESTIMATES_FNAME));
+        let mut file = BufReader::new(&f);
+
+        let mut first = String::new();
+        try!(file.read_line(&mut first));
+        let epsilon: f64 = FromStr::from_str( (&first).trim() ).unwrap();
+
+        let mut second = String::new();
+        try!(file.read_line(&mut second));
+        let alpha: f64 = FromStr::from_str( (&second).trim() ).unwrap();
+
+        println!("first line is: {}", first);
+        println!("second line is: {}", second);
+        /*
+        RLPlayer {
+            player_id: id,
+            estimates: (),
+            epsilon: epsilon,
+            rng: rand::thread_rng(),
+            alpha: alpha,
+        }
+        */
+        unimplemented!()
     }
 
     pub fn choose_action(&mut self, state: &Board) -> Option<CellCoords> {

@@ -8,12 +8,11 @@ extern crate rand;
 use game::Board;
 use game::Cell::{self, X, O};
 use player::RLPlayer;
+use persist::{estimates_file_exists, persist_rlplayer};
 
-use std::fs::{PathExt, File};
-use std::io::{self, Write};
-use std::path::Path;
 
 mod game;
+mod persist;
 mod player;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -126,41 +125,20 @@ impl<'a> TTTGame<'a> {
     }
 }
 
-// most recent is always written as rlttt_estimates
-// as more estimates get persisted, we keep a record of files,
-// rlttt_estimates.1, rlttt_estimates.2, ...
-
 static ESTIMATES_FNAME: &'static str = "rlttt_estimates";
-
-fn persist_rlplayer(player: &RLPlayer) -> io::Result<()> {
-    let path = Path::new(ESTIMATES_FNAME);
-
-    if path.is_file() {
-        panic!("file 'rlttt_estimates' already exists");
-    }
-
-    // create
-    let mut f = try!(File::create(path));
-
-    let line = format!("epsilon: {:?}, alpha: {:?}\n",
-                       player.epsilon, player.alpha);
-    try!(f.write_all(line.as_bytes()));
-
-    for (board, val) in player.get_estimates() {
-        let line = format!("{:?} {:?}\n", board, val);
-        try!(f.write_all(line.as_bytes()));
-    }
-
-    Ok(())
-
-}
-
-
-const NUM_GAMES: u64 = 500;
+const NUM_GAMES: u64 = 5000;
 
 fn main() {
     env_logger::init().unwrap();
-    let mut player1 = RLPlayer::new(PlayerId::P1, 0.08);
+    let mut player1 = if estimates_file_exists() {
+        match RLPlayer::from_file(PlayerId::P1) {
+            Ok(player) => player,
+            Err(_) =>  RLPlayer::new(PlayerId::P1, 0.08),
+        }
+    } else {
+        RLPlayer::new(PlayerId::P1, 0.08)
+    };
+
     let mut player2 = RLPlayer::new(PlayerId::P2, 0.08);
 
 
