@@ -44,18 +44,38 @@ impl RLPlayer {
         try!(file.read_line(&mut second));
         let alpha: f64 = FromStr::from_str( (&second).trim() ).unwrap();
 
+        let mut map = HashMap::new();
+
+        for line in file.lines() {
+            let line_str = match line {
+                Ok(s) => s,
+                Err(e) => return Err(e),
+            };
+
+            let mut segments = line_str.split(' ');
+            let board: Board = match segments.next() {
+                Some(s) => FromStr::from_str(s).unwrap(),
+                _ => panic!("iono wat"),
+            };
+
+            let val: f64 = match segments.next() {
+                Some(s) => FromStr::from_str(s).unwrap(),
+                _ => panic!("iono wat"),
+            };
+
+            map.insert(board, val);
+        }
+
         println!("first line is: {}", first);
         println!("second line is: {}", second);
-        /*
-        RLPlayer {
+
+        Ok(RLPlayer {
             player_id: id,
-            estimates: (),
+            estimates: map,
             epsilon: epsilon,
             rng: rand::thread_rng(),
             alpha: alpha,
-        }
-        */
-        unimplemented!()
+        })
     }
 
     pub fn choose_action(&mut self, state: &Board) -> Option<CellCoords> {

@@ -1,4 +1,5 @@
 use std::fmt;
+use std::str::FromStr;
 use super::PlayerId;
 
 // (row, column). Top-left is (0, 0), bottom-right is (2, 2)
@@ -27,11 +28,47 @@ impl fmt::Debug for Board {
     }
 }
 
+impl FromStr for Board {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let mut chars = s.chars();
+        match chars.next() {
+            Some('[') => {},
+            _ => return Err("missing '['"),
+        }
+
+        let mut cells = [[Cell::Nil; 3]; 3];
+
+        for i in 0..3 {
+            for j in 0..3 {
+                cells[i][j] = match chars.next() {
+                    Some('X') => Cell::X,
+                    Some('O') => Cell::O,
+                    Some('_') => Cell::Nil,
+                    _ => return Err("unrecognized cell marking"),
+                };
+            }
+        }
+
+        match chars.next() {
+            Some(']') => {},
+            _ => return Err("missing ']'"),
+        }
+
+        Ok(Board::from_cells(cells))
+    }
+}
+
 impl Board {
     pub fn new() -> Board {
         Board {
             state: [[Cell::Nil; 3]; 3],
         }
+    }
+
+    fn from_cells(state: [[Cell; 3]; 3]) -> Board {
+        Board { state: state }
     }
 
     fn check_index_out_of_bounds(method: &'static str, row: usize, col: usize) {
