@@ -1,6 +1,6 @@
 use rand;
 use rand::distributions::{IndependentSample, Range};
-use std::collections::HashMap;
+use std::collections::{HashMap, hash_map};
 
 use game::Board;
 use super::PlayerId;
@@ -11,9 +11,9 @@ const ALPHA: f64 = 0.1;
 pub struct RLPlayer {
     player_id: PlayerId,
     estimates: HashMap<Board, f64>,
-    epsilon: f64, // for small chance of non-greedy move
+    pub epsilon: f64, // for small chance of non-greedy move
     rng: rand::ThreadRng,
-    alpha: f64, // "step size parameter"
+    pub alpha: f64, // "step size parameter"
 }
 
 type CellCoords = (usize, usize);
@@ -159,5 +159,26 @@ impl RLPlayer {
         for (k, v) in self.estimates.iter() {
             debug!("  {:?} {:?}", k, v);
         }
+    }
+
+    pub fn get_estimates(&self) -> Estimates {
+        Estimates::new(self.estimates.iter())
+    }
+}
+
+struct Estimates<'a> {
+    iter: hash_map::Iter<'a, Board, f64>,
+}
+
+impl<'a> Estimates<'a> {
+    fn new(iter: hash_map::Iter<'a, Board, f64>) -> Estimates<'a> {
+        Estimates { iter: iter }
+    }
+}
+
+impl<'a> Iterator for Estimates<'a> {
+    type Item = (&'a Board, f64);
+    fn next(&mut self) -> Option<(&'a Board, f64)> {
+        self.iter.next().map(|(board, val)| (board, *val))
     }
 }

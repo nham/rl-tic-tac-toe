@@ -1,5 +1,5 @@
 #![crate_name = "rl_tic_tac_toe"]
-#![feature(slice_patterns)]
+#![feature(slice_patterns, path_ext)]
 
 #[macro_use] extern crate log;
 extern crate env_logger;
@@ -8,6 +8,10 @@ extern crate rand;
 use game::Board;
 use game::Cell::{self, X, O};
 use player::RLPlayer;
+
+use std::fs::{PathExt, File};
+use std::io::{self, Write};
+use std::path::Path;
 
 mod game;
 mod player;
@@ -68,7 +72,7 @@ impl<'a> TTTGame<'a> {
             if let Some(winner) = self.is_won() {
                 return GameResult::Wins(winner)
             }
-            
+
             if self.is_drawn() {
                 return GameResult::Draw
             }
@@ -122,26 +126,67 @@ impl<'a> TTTGame<'a> {
     }
 }
 
+// most recent is always written as rlttt_estimates
+// as more estimates get persisted, we keep a record of files,
+// rlttt_estimates.1, rlttt_estimates.2, ...
+
+static ESTIMATES_FNAME: &'static str = "rlttt_estimates";
+
+fn persist_rlplayer(player: &RLPlayer) -> io::Result<()> {
+    let path = Path::new(ESTIMATES_FNAME);
+
+    if path.is_file() {
+        panic!("file 'rlttt_estimates' already exists");
+    }
+
+    // create
+    let mut f = try!(File::create(path));
+
+    let line = format!("epsilon: {:?}, alpha: {:?}\n",
+                       player.epsilon, player.alpha);
+    try!(f.write_all(line.as_bytes()));
+
+    for (board, val) in player.get_estimates() {
+        let line = format!("{:?} {:?}\n", board, val);
+        try!(f.write_all(line.as_bytes()));
+    }
+
+    Ok(())
+
+}
+
 
 const NUM_GAMES: u64 = 500;
 
 fn main() {
     env_logger::init().unwrap();
-    let mut player1 = RLPlayer::new(PlayerId::P1, 0.95);
+    let mut player1 = RLPlayer::new(PlayerId::P1, 0.08);
     let mut player2 = RLPlayer::new(PlayerId::P2, 0.08);
-    let mut game = TTTGame::new(&mut player1, &mut player2);
+
 
     let mut p1 = 0;
-    for _ in 0..NUM_GAMES  {
-        match game.play() {
-            GameResult::Wins(PlayerId::P1) => { p1 += 1; },
-            _ => {},
+    {
+        let mut game = TTTGame::new(&mut player1, &mut player2);
+
+        for _ in 0..NUM_GAMES  {
+            match game.play() {
+                GameResult::Wins(PlayerId::P1) => { p1 += 1; },
+                _ => {},
+            }
+            game.reset();
+            debug!("------------------------");
+            debug!("------------------------");
         }
-        game.reset();
-        debug!("------------------------");
-        debug!("------------------------");
     }
 
     println!("Played {} games.", NUM_GAMES);
     println!("Wins: P1: {}, P2: {}", p1, NUM_GAMES - p1);
+
+    // persist player 1. idea is we are really just trying to train a player to play as X
+    // later we'll train one to exclusively play as O? or how about 1 player that is trained
+    // to play both? options to consider
+    match persist_rlplayer(&player1) {
+        Err(e) => panic!("Error persisting player 1: {:?}", e),
+        _ => {},
+    }
 }
