@@ -2,7 +2,7 @@ use rand;
 use rand::distributions::{IndependentSample, Range};
 use std::collections::{HashMap, hash_map};
 use std::fs::File;
-use std::io::{self, BufRead, BufReader};
+use std::io::{self, BufRead, BufReader, Write};
 use std::str::FromStr;
 
 use game::Board;
@@ -209,6 +209,15 @@ impl<'a> Iterator for Estimates<'a> {
     }
 }
 
+pub struct HumanPlayer {
+    player_id: PlayerId,
+}
+
+impl HumanPlayer {
+    pub fn new(id: PlayerId) -> HumanPlayer {
+        HumanPlayer { player_id: id }
+    }
+}
 
 pub trait Player {
     fn choose_action(&mut self, state: &Board) -> Option<CellCoords>;
@@ -236,4 +245,33 @@ impl Player for RLPlayer {
         self.update_estimate(state1, new_estimate).unwrap();
     }
 
+}
+
+impl Player for HumanPlayer {
+    fn choose_action(&mut self, board: &Board) -> Option<CellCoords> {
+        if board.is_drawn() {
+            None
+        } else {
+            // display board in terminal and prompt the human for a move.
+            println!("{}", board);
+
+            let stdin = io::stdin();
+            let mut row: usize;
+            let mut col: usize;
+            loop {
+                print!("\nCell to mark (x, y): ");
+                io::stdout().flush();
+                let mut input_line = String::new();
+                stdin.lock().read_line(&mut input_line);
+                row = FromStr::from_str( &input_line[1..2] ).unwrap();
+                col = FromStr::from_str( &input_line[4..5] ).unwrap();
+                println!("({}, {}) is {:?}", row, col, board.get(row, col));
+                if !board.is_nil(row, col) { continue; }
+                return Some((row, col));
+            }
+        }
+    }
+
+    // happens in human's brain
+    fn update_after_action(&mut self, _board1: &Board, _board2: &Board) {}
 }

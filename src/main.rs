@@ -7,7 +7,7 @@ extern crate rand;
 
 use game::Board;
 use game::Cell::{self, X, O};
-use player::{Player, RLPlayer};
+use player::{Player, RLPlayer, HumanPlayer};
 use persist::{estimates_file_exists, persist_rlplayer};
 
 
@@ -123,7 +123,7 @@ impl<'a> Game<'a> {
 }
 
 static ESTIMATES_FNAME: &'static str = "rlttt_estimates";
-const NUM_GAMES: u64 = 5000;
+const NUM_GAMES: u64 = 3;
 
 fn main() {
     env_logger::init().unwrap();
@@ -136,16 +136,24 @@ fn main() {
         RLPlayer::new(PlayerId::P1, 0.08)
     };
 
-    let mut player2 = RLPlayer::new(PlayerId::P2, 0.08);
+    //let mut player2 = RLPlayer::new(PlayerId::P2, 0.08);
+    let mut player2 = HumanPlayer::new(PlayerId::P2);
 
 
     let mut p1 = 0;
     {
         let mut game = Game::new(&mut player1, &mut player2);
 
-        for _ in 0..NUM_GAMES  {
+        for i in 0..NUM_GAMES  {
+            println!("Game {}:", i);
             match game.play() {
-                GameResult::Wins(PlayerId::P1) => { p1 += 1; },
+                GameResult::Wins(pid) => {
+                    if pid == PlayerId::P1 {
+                        p1 += 1;
+                    }
+
+                    println!("{:?} wins!", pid);
+                },
                 _ => {},
             }
             game.reset();

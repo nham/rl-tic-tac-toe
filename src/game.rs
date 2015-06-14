@@ -28,6 +28,22 @@ impl fmt::Debug for Board {
     }
 }
 
+impl fmt::Display for Board {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        for row in self.state.iter() {
+            try!(write!(f, "| "));
+            for cell in row.iter() {
+                match *cell {
+                    Cell::Nil => try!(write!(f, "_ ")),
+                    _ => try!(write!(f, "{:?} ", cell)),
+                }
+            }
+            try!(write!(f, "|\n"));
+        }
+        Ok(())
+    }
+}
+
 impl FromStr for Board {
     type Err = &'static str;
 
