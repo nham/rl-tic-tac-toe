@@ -42,16 +42,16 @@ enum GameResult {
     Draw,
 }
 
-struct TTTGame<'a> {
+struct Game<'a> {
     current: PlayerId,
     players: [&'a mut Player; 2],
     board: Board,
 }
 
 
-impl<'a> TTTGame<'a> {
-    fn new(player1: &'a mut Player, player2: &'a mut Player) -> TTTGame<'a> {
-        TTTGame {
+impl<'a> Game<'a> {
+    fn new(player1: &'a mut Player, player2: &'a mut Player) -> Game<'a> {
+        Game {
             current: PlayerId::P1,
             players: [player1, player2],
             board: Board::new(),
@@ -141,7 +141,7 @@ fn main() {
 
     let mut p1 = 0;
     {
-        let mut game = TTTGame::new(&mut player1, &mut player2);
+        let mut game = Game::new(&mut player1, &mut player2);
 
         for _ in 0..NUM_GAMES  {
             match game.play() {
