@@ -66,9 +66,6 @@ impl RLPlayer {
             map.insert(board, val);
         }
 
-        println!("first line is: {}", first);
-        println!("second line is: {}", second);
-
         Ok(RLPlayer {
             player_id: id,
             estimates: map,
@@ -183,7 +180,7 @@ impl RLPlayer {
         estimate1 + self.alpha * (estimate2 - estimate1)
     }
 
-    pub fn print_estimates(&self) {
+    fn print_estimates(&self) {
         debug!("estimates ({:?}):", self.player_id);
         for (k, v) in self.estimates.iter() {
             debug!("  {:?} {:?}", k, v);
