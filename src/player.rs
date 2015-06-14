@@ -78,20 +78,6 @@ impl RLPlayer {
         })
     }
 
-    pub fn choose_action(&mut self, state: &Board) -> Option<CellCoords> {
-        debug!("STARTING choose_action");
-        self.estimate_and_add(*state);
-        let between = Range::new(0., 1.);
-        let k = between.ind_sample(&mut self.rng);
-        if k < self.epsilon {
-            debug!("Player {:?} -- exploratory action", self.player_id);
-            self.exploratory_action(state)
-        } else {
-            debug!("Player {:?} -- greedy action", self.player_id);
-            self.greedy_action(state)
-        }
-    }
-
     //
     fn exploratory_action(&mut self, state: &Board) -> Option<CellCoords> {
         let mut max_val = ::std::f64::MIN;
@@ -197,12 +183,6 @@ impl RLPlayer {
         estimate1 + self.alpha * (estimate2 - estimate1)
     }
 
-    pub fn update_after_action(&mut self, state1: &Board, state2: &Board) {
-        let new_estimate = self.calc_new_estimate(state1, state2);
-        debug!("update_after_action: new_estimate = {}", new_estimate);
-        self.update_estimate(state1, new_estimate).unwrap();
-    }
-
     pub fn print_estimates(&self) {
         debug!("estimates ({:?}):", self.player_id);
         for (k, v) in self.estimates.iter() {
@@ -230,4 +210,33 @@ impl<'a> Iterator for Estimates<'a> {
     fn next(&mut self) -> Option<(&'a Board, f64)> {
         self.iter.next().map(|(board, val)| (board, *val))
     }
+}
+
+
+pub trait Player {
+    fn choose_action(&mut self, state: &Board) -> Option<CellCoords>;
+    fn update_after_action(&mut self, state1: &Board, state2: &Board);
+}
+
+impl Player for RLPlayer {
+    fn choose_action(&mut self, state: &Board) -> Option<CellCoords> {
+        debug!("STARTING choose_action");
+        self.estimate_and_add(*state);
+        let between = Range::new(0., 1.);
+        let k = between.ind_sample(&mut self.rng);
+        if k < self.epsilon {
+            debug!("Player {:?} -- exploratory action", self.player_id);
+            self.exploratory_action(state)
+        } else {
+            debug!("Player {:?} -- greedy action", self.player_id);
+            self.greedy_action(state)
+        }
+    }
+
+    fn update_after_action(&mut self, state1: &Board, state2: &Board) {
+        let new_estimate = self.calc_new_estimate(state1, state2);
+        debug!("update_after_action: new_estimate = {}", new_estimate);
+        self.update_estimate(state1, new_estimate).unwrap();
+    }
+
 }

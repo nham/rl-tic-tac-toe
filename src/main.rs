@@ -7,7 +7,7 @@ extern crate rand;
 
 use game::Board;
 use game::Cell::{self, X, O};
-use player::RLPlayer;
+use player::{Player, RLPlayer};
 use persist::{estimates_file_exists, persist_rlplayer};
 
 
@@ -44,13 +44,13 @@ enum GameResult {
 
 struct TTTGame<'a> {
     current: PlayerId,
-    players: [&'a mut RLPlayer; 2],
+    players: [&'a mut Player; 2],
     board: Board,
 }
 
 
 impl<'a> TTTGame<'a> {
-    fn new(player1: &'a mut RLPlayer, player2: &'a mut RLPlayer) -> TTTGame<'a> {
+    fn new(player1: &'a mut Player, player2: &'a mut Player) -> TTTGame<'a> {
         TTTGame {
             current: PlayerId::P1,
             players: [player1, player2],
@@ -83,7 +83,7 @@ impl<'a> TTTGame<'a> {
         self.board = Board::new();
     }
 
-    fn current_player(&mut self) -> &mut RLPlayer {
+    fn current_player(&mut self) -> &mut Player {
         match self.current {
             PlayerId::P1 => self.players[0],
             PlayerId::P2 => self.players[1],
@@ -91,15 +91,12 @@ impl<'a> TTTGame<'a> {
     }
 
     fn player_action(&mut self) -> Result<(), &'static str> {
-        // FIXME: bad because it copies
-        let board = self.board; // appeasing the borrow checker
+        let board = self.board;
         match self.current_player().choose_action(&board) {
             Some((i, j)) => {
                 self.current_player_mark_cell(i, j);
-                // FIXME: bad because it copies
                 let new_board = self.board;
                 self.current_player().update_after_action(&board, &new_board);
-                self.current_player().print_estimates();
                 self.next_player();
                 Ok(())
             },
