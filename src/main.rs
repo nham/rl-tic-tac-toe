@@ -98,6 +98,7 @@ impl<'a> Game<'a> {
                 let new_board = self.board;
                 self.current_player().update_after_action(&board, &new_board);
                 self.next_player();
+                self.current_player().ensure_board_has_estimate(new_board);
                 Ok(())
             },
             None => Err("No remaining actions."),

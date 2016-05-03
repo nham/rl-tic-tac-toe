@@ -130,7 +130,7 @@ impl RLPlayer {
         }
     }
 
-    fn estimate_and_add(&mut self, state: Board) -> f64 {
+    pub fn estimate_and_add(&mut self, state: Board) -> f64 {
         match self.lookup_estimate(&state) {
             (val, true) => val,
             (val, false) => {
@@ -221,7 +221,8 @@ impl HumanPlayer {
 
 pub trait Player {
     fn choose_action(&mut self, state: &Board) -> Option<CellCoords>;
-    fn update_after_action(&mut self, state1: &Board, state2: &Board);
+    fn update_after_action(&mut self, board1: &Board, board2: &Board);
+    fn ensure_board_has_estimate(&mut self, board: Board);
 }
 
 impl Player for RLPlayer {
@@ -243,6 +244,10 @@ impl Player for RLPlayer {
         let new_estimate = self.calc_new_estimate(state1, state2);
         debug!("update_after_action: new_estimate = {}", new_estimate);
         self.update_estimate(state1, new_estimate).unwrap();
+    }
+
+    fn ensure_board_has_estimate(&mut self, board: Board) {
+        self.estimate_and_add(board);
     }
 
 }
@@ -274,4 +279,5 @@ impl Player for HumanPlayer {
 
     // happens in human's brain
     fn update_after_action(&mut self, _board1: &Board, _board2: &Board) {}
+    fn ensure_board_has_estimate(&mut self, _board: Board) {}
 }
